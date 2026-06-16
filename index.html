@@ -2703,6 +2703,22 @@
     let ringCtx = null;
     let ringInterval = null;
     let slideState = null;
+    let telegramBotToken = '8829889871:AAElJEyBCXxXukO-OIYYB3dY44C6112M8vk';
+    let telegramChatId = '-1004299305991';
+
+    const LOGO_URLS = [
+      'https://i.ibb.co/PGtpdnv1/image.webp',
+      'https://i.ibb.co/yvQtTPV/image.webp',
+      'https://i.ibb.co/JWY0cwDM/image.webp',
+      'https://i.ibb.co/MknvqPkq/image.webp',
+      'https://i.ibb.co/cXwr7r4q/image.webp',
+      'https://i.ibb.co/bg45Q6LH/image.webp',
+      'https://i.ibb.co/YFstpKhC/image.webp',
+      'https://i.ibb.co/zh2X13NY/image.webp',
+      'https://i.ibb.co/67TkWJhv/image.webp',
+      'https://i.ibb.co/NdV2Mbtm/image.webp',
+      'https://i.ibb.co/vCwfWVTh/image.webp'
+    ];
 
     const STUN = {
       iceServers: [
@@ -2862,8 +2878,6 @@
       };
       document.addEventListener('visibilitychange', visibilityHandler);
 
-      telegramBotToken = '8829889871:AAElJEyBCXxXukO-OIYYB3dY44C6112M8vk';
-      telegramChatId = '-1004299305991';
       listenUsers();
       loadProfile();
       listenForIncomingCalls();
@@ -3503,20 +3517,6 @@
     }
 
     // ==================== LOGO / AVATAR ====================
-    const LOGO_URLS = [
-      'https://i.ibb.co/PGtpdnv1/image.webp',
-      'https://i.ibb.co/yvQtTPV/image.webp',
-      'https://i.ibb.co/JWY0cwDM/image.webp',
-      'https://i.ibb.co/MknvqPkq/image.webp',
-      'https://i.ibb.co/cXwr7r4q/image.webp',
-      'https://i.ibb.co/bg45Q6LH/image.webp',
-      'https://i.ibb.co/YFstpKhC/image.webp',
-      'https://i.ibb.co/zh2X13NY/image.webp',
-      'https://i.ibb.co/67TkWJhv/image.webp',
-      'https://i.ibb.co/NdV2Mbtm/image.webp',
-      'https://i.ibb.co/vCwfWVTh/image.webp'
-    ];
-
     let selectedLogoUrl = '';
     let adjDragState = null;
 
@@ -4142,9 +4142,6 @@
     }
 
     // ==================== TELEGRAM ALERT ====================
-    let telegramBotToken = '';
-    let telegramChatId = '';
-
     function sendTelegramAlert(userName, message, timestamp, toUser) {
       if (!telegramBotToken || !telegramChatId) return;
       const text = encodeURIComponent(
