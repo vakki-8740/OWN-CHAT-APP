@@ -3919,12 +3919,13 @@
 
       try {
         const doc = await callsDb.doc(callId).get();
-        if (!doc.exists) { cleanupCall(); return; }
-        const offer = JSON.parse(doc.data().offer);
+        if (!doc.exists || !doc.data().offer) { cleanupCall(); return; }
+        let offer;
+        try { offer = JSON.parse(doc.data().offer); } catch (e) { cleanupCall(); return; }
 
         setupPeerConn(false);
 
-        await callPeerConn.setRemoteDescription(offer);
+        await callPeerConn.setRemoteDescription(new RTCSessionDescription(offer));
         const answer = await callPeerConn.createAnswer();
         await callPeerConn.setLocalDescription(answer);
         await callsDb.doc(callId).update({
@@ -4048,23 +4049,23 @@
           return;
         }
 
-        if (currentCallData.role === 'caller' && d.answer && !callPeerConn?.currentRemoteDescription) {
+        if (currentCallData.role === 'caller' && d.answer && callPeerConn && !callPeerConn.currentRemoteDescription) {
           try {
             const a = JSON.parse(d.answer);
-            callPeerConn.setRemoteDescription(a);
+            await callPeerConn.setRemoteDescription(new RTCSessionDescription(a));
             const name = getUserName(currentCallData.userId);
             showActiveCallUI(name, currentCallData.type);
             startCallTimer();
           } catch (e) {}
         }
 
-        if (currentCallData.role === 'caller' && d.ice_to) {
+        if (currentCallData.role === 'caller' && d.ice_to && callPeerConn) {
           while (iceToCount < d.ice_to.length) {
             try { callPeerConn.addIceCandidate(JSON.parse(d.ice_to[iceToCount])); } catch (e) {}
             iceToCount++;
           }
         }
-        if (currentCallData.role === 'callee' && d.ice_from) {
+        if (currentCallData.role === 'callee' && d.ice_from && callPeerConn) {
           while (iceFromCount < d.ice_from.length) {
             try { callPeerConn.addIceCandidate(JSON.parse(d.ice_from[iceFromCount])); } catch (e) {}
             iceFromCount++;
@@ -4118,7 +4119,12 @@
       document.getElementById('localVideo').style.display = isVideoOn ? 'block' : 'none';
     }
 
-    function toggleSpeaker() {}
+    function toggleSpeaker() {
+      const ra = document.getElementById('remoteAudio');
+      if (!ra) return;
+      ra.muted = !ra.muted;
+      document.getElementById('speakerBtn').classList.toggle('off', ra.muted);
+    }
 
     // ==================== RINGTONE ====================
     function playRingtone() {
