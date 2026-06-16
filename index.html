@@ -4038,7 +4038,7 @@
     function listenCallUpdates(callId) {
       if (callUpdateListener) callUpdateListener();
 
-      callUpdateListener = callsDb.doc(callId).onSnapshot((snap) => {
+      callUpdateListener = callsDb.doc(callId).onSnapshot(async (snap) => {
         if (!snap.exists) { cleanupCall(); return; }
         const d = snap.data();
 
