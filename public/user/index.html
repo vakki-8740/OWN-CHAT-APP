@@ -3637,6 +3637,8 @@
 
     async function startRecording() {
       if (isRecording || !selectedUserId) return;
+      recordedBlob = null;
+      recordedDuration = 0;
       try {
         voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true });
         const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
@@ -3653,13 +3655,13 @@
 
         mediaRecorder.start(100);
         document.getElementById('voiceBtn').classList.add('recording');
+        document.getElementById('voiceBtn').innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
         document.getElementById('recordingBar').classList.add('show');
         document.getElementById('recTimer').textContent = '0:00';
         recordingTimerInt = setInterval(() => {
           const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
           document.getElementById('recTimer').textContent = formatDuration(elapsed);
         }, 200);
-        hideSendBtn();
       } catch (err) {
         console.error('Mic error:', err);
         isRecording = false;
@@ -3671,6 +3673,7 @@
       isRecording = false;
       clearInterval(recordingTimerInt);
       document.getElementById('voiceBtn').classList.remove('recording');
+      document.getElementById('voiceBtn').innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>';
       document.getElementById('recordingBar').classList.remove('show');
       mediaRecorder.onstop = () => {
         recordedBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
@@ -3679,7 +3682,8 @@
           voiceStream.getTracks().forEach(t => t.stop());
           voiceStream = null;
         }
-        sendMessage();
+        const input = document.getElementById('messageInput');
+        if (input.value.trim() || selectedFile || recordedBlob) showSendBtn();
       };
       if (mediaRecorder.state !== 'inactive') {
         mediaRecorder.stop();
@@ -3691,8 +3695,8 @@
       isRecording = false;
       clearInterval(recordingTimerInt);
       document.getElementById('voiceBtn').classList.remove('recording');
+      document.getElementById('voiceBtn').innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>';
       document.getElementById('recordingBar').classList.remove('show');
-      if (document.getElementById('messageInput').value.trim()) showSendBtn();
       if (voiceStream) {
         voiceStream.getTracks().forEach(t => t.stop());
         voiceStream = null;
@@ -3702,6 +3706,7 @@
       }
       recordedBlob = null;
       recordedDuration = 0;
+      if (document.getElementById('messageInput').value.trim() || selectedFile) showSendBtn(); else hideSendBtn();
     }
 
     function toggleVoicePlay(msgId, url) {
@@ -3763,7 +3768,7 @@
       el.style.height = 'auto';
       el.style.height = Math.min(el.scrollHeight, 100) + 'px';
       const v = el.value.trim();
-      if (v || selectedFile) showSendBtn(); else hideSendBtn();
+      if (v || selectedFile || recordedBlob) showSendBtn(); else hideSendBtn();
     }
 
     function showSendBtn() { document.getElementById('sendBtn').classList.add('show'); }
@@ -4059,56 +4064,13 @@
       }
     });
 
-    // Voice button events (press-and-hold to record)
-    const voiceBtn = document.getElementById('voiceBtn');
-    let voicePressTimer = null;
-    let voicePressed = false;
-
-    voiceBtn.addEventListener('mousedown', (e) => {
-      e.preventDefault();
-      voicePressTimer = setTimeout(() => {
-        voicePressed = true;
-        startRecording();
-      }, 150);
-    });
-
-    voiceBtn.addEventListener('mouseup', (e) => {
-      clearTimeout(voicePressTimer);
-      if (voicePressed && isRecording) {
+    // Voice button: tap to start recording, tap again to stop
+    document.getElementById('voiceBtn').addEventListener('click', () => {
+      if (isRecording) {
         stopRecording();
-      }
-      voicePressed = false;
-    });
-
-    voiceBtn.addEventListener('mouseleave', () => {
-      clearTimeout(voicePressTimer);
-      if (voicePressed && isRecording) {
-        cancelRecording();
-      }
-      voicePressed = false;
-    });
-
-    voiceBtn.addEventListener('touchstart', (e) => {
-      voicePressTimer = setTimeout(() => {
-        voicePressed = true;
+      } else {
         startRecording();
-      }, 150);
-    }, { passive: true });
-
-    voiceBtn.addEventListener('touchend', (e) => {
-      clearTimeout(voicePressTimer);
-      if (voicePressed && isRecording) {
-        stopRecording();
       }
-      voicePressed = false;
-    });
-
-    voiceBtn.addEventListener('touchcancel', () => {
-      clearTimeout(voicePressTimer);
-      if (voicePressed && isRecording) {
-        cancelRecording();
-      }
-      voicePressed = false;
     });
 
     // ==================== CALL FEATURE ====================
