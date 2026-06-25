@@ -1,0 +1,2512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Admin Panel - Chat</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --ios-blue: #007AFF;
+      --ios-green: #34C759;
+      --ios-red: #FF3B30;
+      --ios-orange: #FF9500;
+      --ios-gray: #8E8E93;
+      --ios-gray2: #AEAEB2;
+      --ios-gray3: #C7C7CC;
+      --ios-gray4: #D1D1D6;
+      --ios-gray5: #E5E5EA;
+      --ios-gray6: #F2F2F7;
+      --ios-bg: #F2F2F7;
+      --ios-card: #FFFFFF;
+      --ios-text: #000000;
+      --ios-separator: rgba(60, 60, 67, 0.12);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+      background: var(--ios-bg);
+      color: var(--ios-text);
+      height: 100vh;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ==================== LOGIN ==================== */
+    .login-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--ios-bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 400;
+      padding: 24px;
+    }
+
+    .login-screen.hide {
+      display: none;
+    }
+
+    .login-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, #FF9500, #FF3B30);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 32px rgba(255, 149, 0, 0.3);
+    }
+
+    .login-title {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .login-sub {
+      font-size: 15px;
+      color: var(--ios-gray);
+      margin-bottom: 32px;
+    }
+
+    .login-form {
+      width: 100%;
+      max-width: 340px;
+    }
+
+    .login-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 0.5px solid var(--ios-separator);
+      border-radius: 12px;
+      font-size: 16px;
+      font-family: inherit;
+      background: var(--ios-card);
+      outline: none;
+      margin-bottom: 12px;
+      transition: border-color 0.2s;
+    }
+
+    .login-input:focus {
+      border-color: var(--ios-blue);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--ios-blue);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 17px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: transform 0.15s, opacity 0.15s;
+    }
+
+    .login-btn:active {
+      transform: scale(0.97);
+      opacity: 0.8;
+    }
+
+    .login-error {
+      color: var(--ios-red);
+      font-size: 14px;
+      text-align: center;
+      margin-top: 12px;
+      display: none;
+    }
+
+    /* ==================== ADMIN LAYOUT ==================== */
+    .admin-layout {
+      display: none;
+      height: 100vh;
+    }
+
+    .admin-layout.show {
+      display: flex;
+    }
+
+    /* ==================== SIDEBAR ==================== */
+    .sidebar {
+      width: 360px;
+      background: var(--ios-card);
+      border-right: 0.5px solid var(--ios-separator);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 16px 20px;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 0.5px solid var(--ios-separator);
+    }
+
+    .sidebar-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .sidebar-header .admin-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, #FF9500, #FF3B30);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 6px;
+    }
+
+    .sidebar-stats {
+      display: flex;
+      gap: 8px;
+      padding: 12px 20px;
+      border-bottom: 0.5px solid var(--ios-separator);
+    }
+
+    .stat-card {
+      flex: 1;
+      background: var(--ios-gray6);
+      border-radius: 12px;
+      padding: 10px 12px;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--ios-blue);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--ios-gray);
+      margin-top: 2px;
+    }
+
+    .search-box {
+      padding: 8px 20px;
+      border-bottom: 0.5px solid var(--ios-separator);
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 14px 10px 36px;
+      background: var(--ios-gray6);
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-family: inherit;
+      outline: none;
+      color: var(--ios-text);
+    }
+
+    .search-wrapper {
+      position: relative;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--ios-gray2);
+      font-size: 14px;
+    }
+
+    .user-list {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .user-list::-webkit-scrollbar {
+      display: none;
+    }
+
+    .user-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 20px;
+      border-bottom: 0.5px solid var(--ios-separator);
+      cursor: pointer;
+      transition: background 0.15s;
+      gap: 12px;
+    }
+
+    .user-item:hover {
+      background: var(--ios-gray6);
+    }
+
+    .user-item.active {
+      background: var(--ios-blue);
+    }
+
+    .user-item.active * {
+      color: white !important;
+    }
+
+    .user-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--ios-blue), #5856D6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 18px;
+      font-weight: 600;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .online-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--ios-green);
+      border: 2px solid white;
+      position: absolute;
+      bottom: 0;
+      right: 0;
+    }
+
+    .user-item.active .online-dot {
+      border-color: var(--ios-blue);
+    }
+
+    .offline-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--ios-gray3);
+      border: 2px solid white;
+      position: absolute;
+      bottom: 0;
+      right: 0;
+    }
+
+    .user-item.active .offline-dot {
+      border-color: var(--ios-blue);
+    }
+
+    .user-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .user-name {
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .user-number {
+      font-size: 12px;
+      color: var(--ios-gray);
+      font-weight: 500;
+    }
+
+    .user-last-msg {
+      font-size: 14px;
+      color: var(--ios-gray);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+
+    .user-time {
+      font-size: 12px;
+      color: var(--ios-gray2);
+      flex-shrink: 0;
+      align-self: flex-start;
+      margin-top: 2px;
+    }
+
+    .unread-badge {
+      min-width: 20px;
+      height: 20px;
+      border-radius: 10px;
+      background: var(--ios-red);
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 6px;
+      flex-shrink: 0;
+    }
+
+    .no-users {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--ios-gray);
+    }
+
+    .no-users .icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    /* ==================== CHAT AREA ==================== */
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--ios-bg);
+    }
+
+    .chat-header {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 0.5px solid var(--ios-separator);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .back-btn {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 22px;
+      color: var(--ios-blue);
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .chat-header .nav-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--ios-blue), #5856D6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .chat-header .nav-info {
+      flex: 1;
+    }
+
+    .chat-header .nav-title {
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    .chat-header .nav-subtitle {
+      font-size: 13px;
+      color: var(--ios-gray);
+    }
+
+    .chat-header .nav-subtitle.online {
+      color: var(--ios-green);
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 16px 20px;
+    }
+
+    .chat-messages::-webkit-scrollbar {
+      display: none;
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--ios-gray);
+    }
+
+    .empty-state .icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+
+    .empty-state .title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--ios-text);
+      margin-bottom: 8px;
+    }
+
+    .empty-state .sub {
+      font-size: 15px;
+    }
+
+    /* Messages */
+    .message-wrapper {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 8px;
+      animation: msgIn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    @keyframes msgIn {
+      from { opacity: 0; transform: translateY(10px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .message-wrapper.admin {
+      align-items: flex-end;
+    }
+
+    .message-wrapper.user {
+      align-items: flex-start;
+    }
+
+    .message-bubble {
+      max-width: 65%;
+      padding: 10px 14px;
+      border-radius: 18px;
+      font-size: 15px;
+      line-height: 1.35;
+      word-wrap: break-word;
+    }
+
+    .message-wrapper.admin .message-bubble {
+      background: var(--ios-blue);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .message-wrapper.user .message-bubble {
+      background: var(--ios-gray5);
+      color: var(--ios-text);
+      border-bottom-left-radius: 4px;
+    }
+
+    .message-time {
+      font-size: 11px;
+      color: var(--ios-gray);
+      margin-top: 2px;
+      padding: 0 4px;
+    }
+
+    .message-image {
+      max-width: 260px;
+      border-radius: 16px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .message-image img {
+      width: 100%;
+      display: block;
+      border-radius: 16px;
+    }
+
+    .date-separator {
+      text-align: center;
+      margin: 16px 0;
+    }
+
+    .date-separator span {
+      background: var(--ios-bg);
+      padding: 4px 12px;
+      font-size: 12px;
+      color: var(--ios-gray);
+      font-weight: 500;
+    }
+
+    .typing-indicator {
+      display: none;
+      padding: 10px 14px;
+      background: var(--ios-gray5);
+      border-radius: 18px;
+      border-bottom-left-radius: 4px;
+      margin-bottom: 8px;
+      width: fit-content;
+    }
+
+    .typing-indicator.show {
+      display: inline-flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .typing-indicator .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--ios-gray2);
+      animation: typingBounce 1.4s infinite ease-in-out;
+    }
+
+    .typing-indicator .dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator .dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typingBounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-4px); }
+    }
+
+    /* Chat Input */
+    .chat-input-area {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: saturate(180%) blur(20px);
+      border-top: 0.5px solid var(--ios-separator);
+      padding: 8px 16px 12px;
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    .chat-input-area .attach-btn,
+    .chat-input-area .send-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: transform 0.15s;
+    }
+
+    .chat-input-area .attach-btn:active,
+    .chat-input-area .send-btn:active {
+      transform: scale(0.88);
+    }
+
+    .chat-input-area .attach-btn {
+      background: transparent;
+      color: var(--ios-blue);
+      font-size: 22px;
+    }
+
+    .chat-input-area .send-btn {
+      background: var(--ios-blue);
+      color: white;
+      font-size: 16px;
+      opacity: 0;
+      transform: scale(0.5);
+      pointer-events: none;
+      transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .chat-input-area .send-btn.show {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+
+    .input-wrapper {
+      flex: 1;
+      background: var(--ios-gray6);
+      border-radius: 20px;
+      padding: 8px 14px;
+      display: flex;
+      align-items: flex-end;
+      min-height: 36px;
+      border: 0.5px solid var(--ios-separator);
+    }
+
+    .input-wrapper textarea {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-size: 15px;
+      font-family: inherit;
+      resize: none;
+      outline: none;
+      max-height: 100px;
+      line-height: 1.35;
+      color: var(--ios-text);
+      padding: 0;
+    }
+
+    .input-wrapper textarea::placeholder {
+      color: var(--ios-gray2);
+    }
+
+    .image-preview {
+      display: none;
+      padding: 8px 16px;
+      background: var(--ios-card);
+      border-top: 0.5px solid var(--ios-separator);
+    }
+
+    .image-preview.show {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .image-preview img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    .image-preview .remove-img {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #adminFileInput {
+      display: none;
+    }
+
+    /* Lightbox */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.92);
+      z-index: 500;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .lightbox.show {
+      display: flex;
+    }
+
+    .lightbox img {
+      max-width: 95%;
+      max-height: 90vh;
+      border-radius: 8px;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 14px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      z-index: 300;
+      transform: translateX(120%);
+      transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      max-width: 320px;
+    }
+
+    .toast.show {
+      transform: translateX(0);
+    }
+
+    .toast-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--ios-blue), #5856D6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .toast-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .toast-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .toast-msg {
+      font-size: 13px;
+      color: var(--ios-gray);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        position: absolute;
+        z-index: 10;
+        transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      }
+
+      .sidebar.hide {
+        transform: translateX(-100%);
+      }
+
+      .chat-area {
+        width: 100%;
+      }
+
+      .back-btn {
+        display: block;
+      }
+    }
+  /* ==================== CALL FEATURE ==================== */
+    .call-actions {
+      display: flex;
+      gap: 6px;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .call-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: none;
+      background: var(--ios-gray6);
+      color: var(--ios-blue);
+      font-size: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.15s;
+      flex-shrink: 0;
+    }
+
+    .call-btn:active {
+      transform: scale(0.85);
+    }
+
+    /* Call Overlay */
+    .call-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.92);
+      z-index: 600;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .call-overlay.show {
+      display: flex;
+    }
+
+    /* Incoming Call - iOS Slide to Answer */
+    @keyframes iosSlideUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .incoming-content {
+      text-align: center;
+      padding: 40px 20px 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      height: 100%;
+      animation: iosSlideUp 0.5s cubic-bezier(0.32, 0.08, 0.24, 1);
+    }
+
+    .incoming-bottom {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .incoming-top {
+      padding-top: 60px;
+    }
+
+    .incoming-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 44px;
+      font-weight: 600;
+      margin: 0 auto 20px;
+      box-shadow: 0 8px 40px rgba(0, 122, 255, 0.4);
+    }
+
+    .incoming-name {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .incoming-type {
+      font-size: 16px;
+      color: rgba(255,255,255,0.6);
+    }
+
+    /* Slide to Answer */
+    .slide-track {
+      width: 280px;
+      height: 56px;
+      border-radius: 28px;
+      background: rgba(255,255,255,0.2);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    .slide-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 0%;
+      border-radius: 28px;
+      background: #34C759;
+      transition: width 0.1s linear;
+    }
+
+    .slide-thumb {
+      position: absolute;
+      left: 2px;
+      top: 2px;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      z-index: 2;
+      cursor: grab;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      touch-action: none;
+    }
+
+    .slide-thumb:active {
+      cursor: grabbing;
+    }
+
+    .slide-text {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: white;
+      letter-spacing: 0.3px;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    /* Decline */
+    .decline-section {
+      padding-bottom: 40px;
+      text-align: center;
+    }
+
+    .decline-btn {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: none;
+      background: #FF3B30;
+      color: white;
+      font-size: 26px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 8px;
+      transition: transform 0.15s;
+      box-shadow: 0 4px 16px rgba(255, 59, 48, 0.4);
+    }
+
+    .decline-btn:active {
+      transform: scale(0.88);
+    }
+
+    .decline-label {
+      font-size: 13px;
+      color: rgba(255,255,255,0.6);
+    }
+
+    /* Outgoing Call */
+    .outgoing-content {
+      text-align: center;
+      padding: 24px;
+    }
+
+    .outgoing-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 44px;
+      font-weight: 600;
+      margin: 0 auto 20px;
+    }
+
+    .outgoing-name {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .outgoing-status {
+      font-size: 16px;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 40px;
+    }
+
+    .outgoing-end {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: none;
+      background: #FF3B30;
+      color: white;
+      font-size: 28px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      transition: transform 0.15s;
+    }
+
+    .outgoing-end:active {
+      transform: scale(0.88);
+    }
+
+    /* Active Call */
+    .active-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .remote-wrap {
+      flex: 1;
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .remote-wrap video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .remote-wrap .no-video {
+      text-align: center;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .remote-wrap .no-video .big-av {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      font-weight: 600;
+      margin: 0 auto 12px;
+    }
+
+    .local-wrap {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 110px;
+      height: 150px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 2px solid rgba(255,255,255,0.3);
+      background: #222;
+      z-index: 10;
+    }
+
+    .local-wrap video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .call-top-info {
+      position: absolute;
+      top: 20px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .call-top-info .call-name {
+      font-size: 18px;
+      font-weight: 600;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+    }
+
+    .call-top-info .call-timer {
+      font-size: 14px;
+      color: rgba(255,255,255,0.7);
+      text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+      margin-top: 4px;
+    }
+
+    .call-bottom-controls {
+      display: flex;
+      justify-content: center;
+      gap: 28px;
+      padding: 24px 16px;
+      padding-bottom: calc(24px + var(--safe-bottom, 0px));
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(20px);
+    }
+
+    .ctrl-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.15);
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    .ctrl-btn:active {
+      transform: scale(0.88);
+    }
+
+    .ctrl-btn.end-call {
+      background: #FF3B30;
+      width: 54px;
+      height: 54px;
+      font-size: 22px;
+    }
+
+    .ctrl-btn.off {
+      opacity: 0.4;
+    }
+
+    .ctrl-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .ctrl-label {
+      font-size: 10px;
+      color: rgba(255,255,255,0.5);
+    }
+
+    /* ==================== USER DETAIL VIEW ==================== */
+    .detail-header {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 0.5px solid var(--ios-separator);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .detail-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--ios-blue), #5856D6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 18px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .detail-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .detail-name {
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    .detail-sub {
+      font-size: 13px;
+      color: var(--ios-gray);
+    }
+
+    .detail-actions {
+      display: flex;
+      gap: 10px;
+      padding: 12px 20px;
+      border-bottom: 0.5px solid var(--ios-separator);
+      flex-shrink: 0;
+    }
+
+    .action-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.15s, opacity 0.15s;
+    }
+
+    .action-btn:active {
+      transform: scale(0.96);
+      opacity: 0.8;
+    }
+
+    .action-btn.block-btn {
+      background: var(--ios-gray6);
+      color: var(--ios-text);
+    }
+
+    .action-btn.block-btn.blocked {
+      background: var(--ios-orange);
+      color: white;
+    }
+
+    .action-btn.delete-btn {
+      background: var(--ios-red);
+      color: white;
+    }
+
+    .action-btn svg {
+      flex-shrink: 0;
+    }
+
+    .detail-section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ios-gray);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 16px 20px 8px;
+      flex-shrink: 0;
+    }
+
+    .detail-info-section {
+      padding: 0 20px;
+      flex-shrink: 0;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 0.5px solid var(--ios-separator);
+    }
+
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .detail-label {
+      font-size: 14px;
+      color: var(--ios-gray);
+    }
+
+    .detail-value {
+      font-size: 14px;
+      font-weight: 500;
+      text-align: right;
+      max-width: 60%;
+      word-break: break-all;
+    }
+
+    .detail-messages {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 0 20px 16px;
+    }
+
+    .detail-messages::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-msgs {
+      text-align: center;
+      color: var(--ios-gray);
+      padding: 24px;
+      font-size: 14px;
+    }
+
+    .detail-msg-item {
+      display: flex;
+      flex-direction: column;
+      padding: 8px 0;
+      border-bottom: 0.5px solid var(--ios-separator);
+    }
+
+    .detail-msg-meta {
+      font-size: 12px;
+      color: var(--ios-gray2);
+      margin-bottom: 2px;
+    }
+
+    .detail-msg-from {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ios-blue);
+    }
+
+    .detail-msg-text {
+      font-size: 15px;
+      line-height: 1.35;
+      margin-top: 2px;
+    }
+
+    .detail-msg-text img {
+      max-width: 120px;
+      border-radius: 8px;
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .local-wrap {
+        width: 90px;
+        height: 130px;
+      }
+      .incoming-avatar, .outgoing-avatar {
+        width: 80px;
+        height: 80px;
+        font-size: 36px;
+      }
+      .incoming-name, .outgoing-name {
+        font-size: 22px;
+      }
+      .call-bottom-controls {
+        gap: 20px;
+        padding: 16px 12px;
+      }
+      .ctrl-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 18px;
+      }
+      .ctrl-btn.end-call {
+        width: 48px;
+        height: 48px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Login Screen -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-icon">🔐</div>
+    <div class="login-title">Admin Panel</div>
+    <div class="login-sub">Login to manage chats</div>
+    <div class="login-form">
+      <input type="text" class="login-input" id="loginUser" placeholder="Username" autocomplete="username">
+      <input type="password" class="login-input" id="loginPass" placeholder="Password" autocomplete="current-password">
+      <button class="login-btn" onclick="doLogin()">Login</button>
+      <div class="login-error" id="loginError">Invalid username or password</div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <div class="toast-avatar" id="toastAvatar">U</div>
+    <div class="toast-content">
+      <div class="toast-title" id="toastTitle">User #1</div>
+      <div class="toast-msg" id="toastMsg">New message</div>
+    </div>
+  </div>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <img id="lightboxImg" src="" alt="Image">
+  </div>
+
+  <!-- Admin Layout -->
+  <div class="admin-layout" id="adminLayout">
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <h1 style="margin:0;">Chats</h1>
+          <button id="tgSettingsBtn" style="background:none; border:none; cursor:pointer; padding:4px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--ios-gray); transition:background 0.2s;" title="Telegram Settings" type="button">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
+        </div>
+        <div class="admin-badge">⚡ Admin Panel</div>
+      </div>
+
+      <div class="sidebar-stats">
+        <div class="stat-card">
+          <div class="stat-num" id="totalUsers">0</div>
+          <div class="stat-label">Total Users</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="onlineUsers">0</div>
+          <div class="stat-label">Online</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="unreadCount">0</div>
+          <div class="stat-label">Blocked</div>
+        </div>
+      </div>
+
+      <div class="search-box">
+        <div class="search-wrapper">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-input" id="searchInput" placeholder="Search users..." oninput="filterUsers()">
+        </div>
+      </div>
+
+      <div class="user-list" id="userList">
+        <div class="no-users">
+          <div class="icon">📭</div>
+          <div>No users yet</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Area -->
+    <div class="chat-area" id="chatArea">
+      <div class="empty-state" id="emptyState">
+        <div class="icon">👥</div>
+        <div class="title">Select a user</div>
+        <div class="sub">Choose a user from the sidebar to view their data</div>
+      </div>
+
+      <div id="userDetailView" style="display:none; flex-direction:column; height:100%;">
+        <div class="detail-header">
+          <button class="back-btn" onclick="goBack()">←</button>
+          <div class="detail-avatar" id="detailAvatar">U</div>
+          <div class="detail-info">
+            <div class="detail-name" id="detailName">User</div>
+            <div class="detail-sub" id="detailSub">Offline</div>
+          </div>
+        </div>
+
+        <div class="detail-actions">
+          <button class="action-btn block-btn" id="blockBtn" onclick="toggleBlockUser()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+            <span id="blockBtnText">Block</span>
+          </button>
+          <button class="action-btn delete-btn" onclick="deleteUser()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            Delete
+          </button>
+        </div>
+
+        <div class="detail-section-title">User Info</div>
+        <div class="detail-info-section">
+          <div class="detail-row">
+            <span class="detail-label">User ID</span>
+            <span class="detail-value" id="detailUserId">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Username</span>
+            <span class="detail-value" id="detailUsername">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Joined</span>
+            <span class="detail-value" id="detailJoined">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Status</span>
+            <span class="detail-value" id="detailStatus">-</span>
+          </div>
+        </div>
+
+        <div class="detail-section-title">Recent Messages</div>
+        <div class="detail-messages" id="detailMessages">
+          <div class="no-msgs">Loading messages...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Incoming Call Overlay - iOS Style -->
+  <div class="call-overlay" id="incomingCall">
+    <div class="incoming-content" id="incomingContent">
+      <div class="incoming-top">
+        <div class="incoming-avatar" id="incomingAvatar">U</div>
+        <div class="incoming-name" id="incomingName">User</div>
+        <div class="incoming-type" id="incomingType">Audio Call</div>
+      </div>
+      <div class="incoming-bottom">
+        <div class="slide-track" id="slideTrack">
+          <div class="slide-fill" id="slideFill"></div>
+          <span class="slide-text" id="slideText">Slide to answer</span>
+          <div class="slide-thumb" id="slideThumb"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+        </div>
+        <div class="decline-section">
+          <button class="decline-btn" onclick="declineCall()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          <div class="decline-label">Decline</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Outgoing Call Overlay -->
+  <div class="call-overlay" id="outgoingCall">
+    <div class="outgoing-content">
+      <div class="outgoing-avatar" id="outgoingAvatar">U</div>
+      <div class="outgoing-name" id="outgoingName">User</div>
+      <div class="outgoing-status" id="outgoingStatus">Calling...</div>
+      <button class="outgoing-end" onclick="endCall()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  </div>
+
+  <!-- Active Call Overlay -->
+  <div class="call-overlay" id="activeCall">
+    <div class="active-container">
+      <div class="remote-wrap" id="remoteWrap">
+        <div class="no-video" id="noVideo">
+          <div class="big-av" id="activeBigAvatar">U</div>
+          <div id="activeNameText">User</div>
+        </div>
+        <video id="remoteVideo" autoplay playsinline style="display:none"></video>
+        <div class="local-wrap" id="localWrap">
+          <video id="localVideo" autoplay playsinline muted style="display:none"></video>
+        </div>
+        <div class="call-top-info">
+          <div class="call-name" id="activeName">User</div>
+          <div class="call-timer" id="callTimer">00:00</div>
+        </div>
+      </div>
+      <div class="call-bottom-controls">
+        <div class="ctrl-group">
+          <button class="ctrl-btn" id="muteBtn" onclick="toggleMute()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
+          <span class="ctrl-label">Mute</span>
+        </div>
+        <div class="ctrl-group">
+          <button class="ctrl-btn" id="videoBtn" onclick="toggleVideo()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg></button>
+          <span class="ctrl-label">Video</span>
+        </div>
+        <div class="ctrl-group">
+          <button class="ctrl-btn" id="speakerBtn" onclick="toggleSpeaker()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></button>
+          <span class="ctrl-label">Speaker</span>
+        </div>
+        <div class="ctrl-group">
+          <button class="ctrl-btn end-call" onclick="endCall()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          <span class="ctrl-label">End</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <audio id="remoteAudio" autoplay playsinline style="display:none"></audio>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyB2j604pnQWRzpu_yE0biwWktths5TxW38",
+      authDomain: "own-chat-app-d5fd0.firebaseapp.com",
+      projectId: "own-chat-app-d5fd0",
+      storageBucket: "own-chat-app-d5fd0.firebasestorage.app",
+      messagingSenderId: "191123388943",
+      appId: "1:191123388943:web:2a352c0912c015e5e1017a"
+    });
+
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+
+    const ADMIN_CREDS = { username: 'admin', password: 'admin123' };
+    let selectedUserId = null;
+    let allUsers = [];
+    let unsubUsers = null;
+    let unsubMessages = null;
+    let unsubTyping = null;
+    let unsubNotif = null;
+    let telegramBotToken = '';
+    let telegramChatId = '';
+
+    // Call feature state
+    let callLocalStream = null;
+    let callPeerConn = null;
+    let currentCallData = null;
+    let callTimerInt = null;
+    let iceFromCount = 0;
+    let iceToCount = 0;
+    let isMuted = false;
+    let isVideoOn = true;
+    let missedTimeout = null;
+    let callIncomingListener = null;
+    let callUpdateListener = null;
+    let ringCtx = null;
+    let ringInterval = null;
+
+    // ==================== LOGIN ====================
+    function doLogin() {
+      const u = document.getElementById('loginUser').value.trim();
+      const p = document.getElementById('loginPass').value.trim();
+
+      if (u === ADMIN_CREDS.username && p === ADMIN_CREDS.password) {
+        document.getElementById('loginScreen').classList.add('hide');
+        document.getElementById('adminLayout').classList.add('show');
+        initAdmin();
+      } else {
+        document.getElementById('loginError').style.display = 'block';
+        setTimeout(() => document.getElementById('loginError').style.display = 'none', 3000);
+      }
+    }
+
+    document.getElementById('loginPass').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') doLogin();
+    });
+
+    // ==================== INIT ADMIN ====================
+    function initAdmin() {
+      listenUsers();
+      listenNotifications();
+      listenForIncomingCalls();
+      listenCallNotifications();
+      loadTelegramSettings();
+    }
+
+    // ==================== USERS ====================
+    function listenUsers() {
+      if (unsubUsers) unsubUsers();
+      unsubUsers = db.collection('users').orderBy('name', 'asc').onSnapshot((snapshot) => {
+        allUsers = [];
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          if (data.deleted) return;
+          allUsers.push({ id: doc.id, ...data, created_at: data.created_at?.toDate?.()?.toISOString() || data.created_at });
+        });
+        renderUsers(allUsers);
+        updateStats();
+      });
+    }
+
+    function renderUsers(users) {
+      const list = document.getElementById('userList');
+
+      if (users.length === 0) {
+        list.innerHTML = `<div class="no-users"><div class="icon">📭</div><div>No users yet</div></div>`;
+        return;
+      }
+
+      list.innerHTML = users.map((user, idx) => {
+        const lastMsg = user.last_message || 'No messages yet';
+        const time = user.last_time ? formatTime(user.last_time) : '';
+        const isActive = selectedUserId === user.id;
+        const dotClass = user.is_online ? 'online-dot' : 'offline-dot';
+        const initial = (user.name || 'U').charAt(0).toUpperCase();
+
+        return `
+          <div class="user-item ${isActive ? 'active' : ''}" onclick="selectUser('${user.id}')">
+            <div class="user-avatar">
+              ${initial}
+              <div class="${dotClass}"></div>
+            </div>
+            <div class="user-info">
+              <div class="user-name">
+                ${user.name || 'User'}
+              </div>
+              <div class="user-last-msg">${escapeHtml(lastMsg)}</div>
+            </div>
+            <div style="text-align:right;">
+              <div class="user-time">${time}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterUsers() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = allUsers.filter(u =>
+        (u.name || '').toLowerCase().includes(q)
+      );
+      renderUsers(filtered);
+    }
+
+    function updateStats() {
+      document.getElementById('totalUsers').textContent = allUsers.length;
+      document.getElementById('onlineUsers').textContent = allUsers.filter(u => u.is_online).length;
+      const blockedCount = allUsers.filter(u => u.blocked).length;
+      document.getElementById('unreadCount').textContent = blockedCount;
+    }
+
+    // ==================== SELECT USER ====================
+    function selectUser(userId) {
+      selectedUserId = userId;
+      const user = allUsers.find(u => u.id === userId);
+      if (!user) return;
+
+      document.getElementById('emptyState').style.display = 'none';
+      document.getElementById('userDetailView').style.display = 'flex';
+
+      showUserDetail(user);
+
+      renderUsers(allUsers);
+
+      if (window.innerWidth <= 768) {
+        document.getElementById('sidebar').classList.add('hide');
+      }
+    }
+
+    function goBack() {
+      document.getElementById('sidebar').classList.remove('hide');
+      selectedUserId = null;
+      document.getElementById('emptyState').style.display = 'flex';
+      document.getElementById('userDetailView').style.display = 'none';
+      if (unsubMessages) unsubMessages();
+    }
+
+    // ==================== USER DETAIL ====================
+    function showUserDetail(user) {
+      const initial = (user.name || 'U').charAt(0).toUpperCase();
+      document.getElementById('detailAvatar').textContent = initial;
+      document.getElementById('detailName').textContent = user.name || 'User';
+      const statusText = user.is_online ? 'Online' : (user.last_seen ? 'Last seen ' + formatLastSeen(user.last_seen) : 'Offline');
+      document.getElementById('detailSub').textContent = statusText;
+      document.getElementById('detailUserId').textContent = user.id;
+      document.getElementById('detailUsername').textContent = user.username || '-';
+      document.getElementById('detailStatus').textContent = statusText;
+
+      if (user.created_at) {
+        const d = new Date(user.created_at);
+        document.getElementById('detailJoined').textContent = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+      } else {
+        document.getElementById('detailJoined').textContent = '-';
+      }
+
+      // Block button state
+      const blockBtn = document.getElementById('blockBtn');
+      const blockText = document.getElementById('blockBtnText');
+      if (user.blocked) {
+        blockBtn.classList.add('blocked');
+        blockText.textContent = 'Unblock';
+      } else {
+        blockBtn.classList.remove('blocked');
+        blockText.textContent = 'Block';
+      }
+
+      loadUserMessages(user.id);
+    }
+
+    // ==================== USER MESSAGES ====================
+    let unsubDetailMsgs = null;
+
+    function loadUserMessages(userId) {
+      if (unsubDetailMsgs) unsubDetailMsgs();
+      const area = document.getElementById('detailMessages');
+      area.innerHTML = '<div class="no-msgs">Loading messages...</div>';
+
+      unsubDetailMsgs = db.collection('messages')
+        .where('from', '==', userId)
+        .onSnapshot((snap) => {
+          if (snap.empty) {
+            area.innerHTML = '<div class="no-msgs">No messages sent by this user</div>';
+            return;
+          }
+          const msgs = [];
+          snap.forEach(doc => msgs.push({ id: doc.id, ...doc.data() }));
+          msgs.sort((a, b) => {
+            const ta = a.created_at?.toDate?.() || 0;
+            const tb = b.created_at?.toDate?.() || 0;
+            return tb - ta;
+          });
+          const maxMsgs = msgs.slice(0, 50);
+          let html = '';
+          maxMsgs.forEach(d => {
+            const ts = d.created_at?.toDate?.() || new Date();
+            const time = ts.toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+            const toUser = allUsers.find(u => u.id === d.to);
+            const toName = toUser ? toUser.name : (d.to === 'admin' ? 'Admin' : 'Unknown');
+            const msgText = d.message || '';
+            const imgHtml = d.image ? `<br><img src="${d.image}" alt="" style="max-width:120px;border-radius:8px;">` : '';
+            html += `
+              <div class="detail-msg-item">
+                <div class="detail-msg-meta">
+                  <span class="detail-msg-from">→ ${escapeHtml(toName)}</span> · ${time}
+                </div>
+                <div class="detail-msg-text">${escapeHtml(msgText)}${imgHtml}</div>
+              </div>`;
+          });
+          area.innerHTML = html || '<div class="no-msgs">No text messages found</div>';
+        });
+    }
+
+    // ==================== BLOCK USER ====================
+    async function toggleBlockUser() {
+      if (!selectedUserId) return;
+      const user = allUsers.find(u => u.id === selectedUserId);
+      if (!user) return;
+      const newState = !user.blocked;
+      try {
+        await db.collection('users').doc(selectedUserId).update({ blocked: newState });
+        user.blocked = newState;
+        const blockBtn = document.getElementById('blockBtn');
+        const blockText = document.getElementById('blockBtnText');
+        if (newState) {
+          blockBtn.classList.add('blocked');
+          blockText.textContent = 'Unblock';
+        } else {
+          blockBtn.classList.remove('blocked');
+          blockText.textContent = 'Block';
+        }
+        updateStats();
+      } catch (err) {
+        console.error('Block error:', err);
+      }
+    }
+
+    // ==================== DELETE USER ====================
+    async function deleteUser() {
+      if (!selectedUserId) return;
+      if (!confirm('Are you sure you want to delete this user?')) return;
+      const userId = selectedUserId;
+      try {
+        await db.collection('users').doc(userId).update({ deleted: true });
+        selectedUserId = null;
+        document.getElementById('emptyState').style.display = 'flex';
+        document.getElementById('userDetailView').style.display = 'none';
+      } catch (err) {
+        console.error('Delete error:', err);
+        alert('Failed to delete user');
+      }
+    }
+
+    // ==================== TELEGRAM ALERT ====================
+    function sendTelegramAlert(userName, message, timestamp, toUser) {
+      if (!telegramBotToken || !telegramChatId) return;
+      const text = encodeURIComponent(
+        `👤 User: ${userName}\n💬 To: ${toUser}\n📝 Message: ${message || '[Image]'}\n⏰ Time: ${timestamp}`
+      );
+      fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage?chat_id=${telegramChatId}&text=${text}`)
+        .catch(err => console.error('Telegram error:', err));
+    }
+
+    // ==================== NOTIFICATIONS ====================
+    function listenNotifications() {
+      let notifInit = false;
+      if (unsubNotif) unsubNotif();
+      unsubNotif = db.collection('messages')
+        .orderBy('created_at', 'asc')
+        .onSnapshot((snap) => {
+          if (!notifInit) { notifInit = true; return; }
+          snap.docChanges().forEach(ch => {
+            if (ch.type === 'added') {
+              const d = ch.doc.data();
+              if (d.from === 'admin') return;
+              const user = allUsers.find(u => u.id === d.from);
+              const name = user ? user.name : 'Unknown';
+              const toUser = allUsers.find(u => u.id === d.to);
+              const toName = toUser ? toUser.name : 'Admin';
+              const ts = d.created_at?.toDate?.() || new Date();
+              const time = ts.toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+              sendTelegramAlert(name, d.message || '[Image]', time, toName);
+            }
+          });
+        });
+    }
+
+    // ==================== CALL NOTIFICATIONS ====================
+    let unsubCallNotif = null;
+
+    function sendTelegramCallAlert(fromName, toName, type, timestamp) {
+      if (!telegramBotToken || !telegramChatId) return;
+      const text = encodeURIComponent(
+        `📞 Call Alert\n👤 From: ${fromName}\n👤 To: ${toName}\n📱 Type: ${type === 'video' ? 'Video Call' : 'Audio Call'}\n⏰ Time: ${timestamp}`
+      );
+      fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage?chat_id=${telegramChatId}&text=${text}`)
+        .catch(err => console.error('Telegram call alert error:', err));
+    }
+
+    function listenCallNotifications() {
+      if (unsubCallNotif) unsubCallNotif();
+      unsubCallNotif = callsDb
+        .where('status', '==', 'ringing')
+        .onSnapshot((snap) => {
+          snap.docChanges().forEach(ch => {
+            if (ch.type !== 'added') return;
+            const d = ch.doc.data();
+            if (d.from === 'admin' || d.to === 'admin') return;
+            const fromUser = allUsers.find(u => u.id === d.from);
+            const toUser = allUsers.find(u => u.id === d.to);
+            const fromName = fromUser ? fromUser.name : 'Unknown';
+            const toName = toUser ? toUser.name : 'Unknown';
+            const ts = d.created_at?.toDate?.() || new Date();
+            const time = ts.toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+            sendTelegramCallAlert(fromName, toName, d.type, time);
+          });
+        });
+    }
+
+    // ==================== UI HELPERS ====================
+    function escapeHtml(text) {
+      const d = document.createElement('div');
+      d.textContent = text;
+      return d.innerHTML;
+    }
+
+    function formatTime(dateStr) {
+      const d = new Date(dateStr);
+      const now = new Date();
+      if (d.toDateString() === now.toDateString()) {
+        return d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+      }
+      return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    }
+
+    function openLightbox(src) {
+      document.getElementById('lightboxImg').src = src;
+      document.getElementById('lightbox').classList.add('show');
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('show');
+    }
+
+    // ==================== CALL FEATURE ====================
+    const STUN = {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
+      ]
+    };
+
+    const callsDb = db.collection('calls');
+
+    function getUserName(uid) {
+      if (uid === 'admin') return 'Admin';
+      const u = allUsers.find(x => x.id === uid);
+      return u ? u.name : 'Unknown';
+    }
+
+    function getInitial(uid) {
+      if (uid === 'admin') return 'A';
+      const u = allUsers.find(x => x.id === uid);
+      return u ? u.name.charAt(0).toUpperCase() : '?';
+    }
+
+    function formatLastSeen(isoStr) {
+      if (!isoStr) return 'Offline';
+      const diff = Date.now() - new Date(isoStr).getTime();
+      const mins = Math.floor(diff / 60000);
+      if (mins < 1) return 'just now';
+      if (mins < 60) return mins + 'm ago';
+      const hrs = Math.floor(mins / 60);
+      if (hrs < 24) return hrs + 'h ago';
+      const days = Math.floor(hrs / 24);
+      return days + 'd ago';
+    }
+
+    // ==================== START CALL ====================
+    async function startCall(userId, type) {
+      if (currentCallData) return;
+      if (!userId) return;
+
+      try {
+        callLocalStream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+          video: type === 'video'
+        });
+      } catch (err) {
+        alert('Cannot access microphone/camera. Please allow permissions.');
+        return;
+      }
+
+      const callId = 'call_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      const name = getUserName(userId);
+      const init = getInitial(userId);
+
+      document.getElementById('outgoingAvatar').textContent = init;
+      document.getElementById('outgoingName').textContent = name;
+      document.getElementById('outgoingStatus').textContent = 'Calling...';
+      document.getElementById('outgoingCall').classList.add('show');
+
+      currentCallData = { callId, userId, type, role: 'caller' };
+      iceFromCount = 0;
+      iceToCount = 0;
+      isMuted = false;
+      isVideoOn = (type === 'video');
+
+      try {
+        await callsDb.doc(callId).set({
+          from: 'admin',
+          to: userId,
+          type: type,
+          status: 'ringing',
+          created_at: firebase.firestore.FieldValue.serverTimestamp(),
+          answered_at: null,
+          ended_at: null,
+          offer: '',
+          answer: '',
+          ice_from: [],
+          ice_to: []
+        });
+
+        setupPeerConn(true);
+
+        const offer = await callPeerConn.createOffer();
+        await callPeerConn.setLocalDescription(offer);
+        await callsDb.doc(callId).update({ offer: JSON.stringify(offer) });
+
+        listenCallUpdates(callId);
+
+        missedTimeout = setTimeout(() => {
+          callsDb.doc(callId).get().then(d => {
+            if (d.exists && d.data().status === 'ringing') {
+              callsDb.doc(callId).update({ status: 'missed' });
+              cleanupCall();
+            }
+          });
+        }, 30000);
+      } catch (err) {
+        console.error('Start call error:', err);
+        cleanupCall();
+      }
+    }
+
+    // ==================== LISTEN FOR INCOMING CALLS ====================
+    function listenForIncomingCalls() {
+      if (callIncomingListener) callIncomingListener();
+      callIncomingListener = callsDb
+        .where('to', '==', 'admin')
+        .onSnapshot((snap) => {
+          snap.docChanges().forEach(ch => {
+            if (ch.type === 'added' || ch.type === 'modified') {
+              const d = ch.doc.data();
+              if (d.from === 'admin') return;
+              if (d.status === 'ringing' && !currentCallData) {
+                showIncomingCall(ch.doc.id, d);
+              }
+            }
+          });
+        });
+    }
+
+    // ==================== SHOW INCOMING CALL ====================
+    function showIncomingCall(callId, data) {
+      if (currentCallData) {
+        callsDb.doc(callId).update({ status: 'declined' });
+        return;
+      }
+
+      currentCallData = { callId, userId: data.from, type: data.type, role: 'callee' };
+      iceFromCount = 0;
+      iceToCount = 0;
+      isVideoOn = (data.type === 'video');
+      isMuted = false;
+
+      const name = getUserName(data.from);
+      const init = getInitial(data.from);
+      document.getElementById('incomingAvatar').textContent = init;
+      document.getElementById('incomingName').textContent = name;
+      document.getElementById('incomingType').textContent = data.type === 'video' ? 'Video Call' : 'Audio Call';
+
+      // Reset slide
+      resetSlide();
+      document.getElementById('incomingCall').classList.add('show');
+      setTimeout(initSlide, 100);
+
+      playRingtone();
+
+      missedTimeout = setTimeout(() => {
+        document.getElementById('incomingCall').classList.remove('show');
+        stopRingtone();
+        if (currentCallData && currentCallData.callId === callId) {
+          callsDb.doc(callId).update({ status: 'missed' });
+          currentCallData = null;
+        }
+      }, 30000);
+    }
+
+    // ==================== ACCEPT CALL ====================
+    async function acceptCall() {
+      if (!currentCallData) return;
+      document.getElementById('incomingCall').classList.remove('show');
+      stopRingtone();
+      clearTimeout(missedTimeout);
+
+      const { callId, userId, type } = currentCallData;
+
+      try {
+        callLocalStream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+          video: type === 'video'
+        });
+      } catch (err) {
+        alert('Cannot access microphone/camera');
+        callsDb.doc(callId).update({ status: 'declined' });
+        currentCallData = null;
+        return;
+      }
+
+      const name = getUserName(userId);
+      showActiveCallUI(name, type);
+
+      try {
+        const doc = await callsDb.doc(callId).get();
+        if (!doc.exists) { cleanupCall(); return; }
+        const offer = JSON.parse(doc.data().offer);
+
+        setupPeerConn(false);
+
+        await callPeerConn.setRemoteDescription(offer);
+        const answer = await callPeerConn.createAnswer();
+        await callPeerConn.setLocalDescription(answer);
+        await callsDb.doc(callId).update({
+          answer: JSON.stringify(answer),
+          status: 'ongoing',
+          answered_at: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        currentCallData.role = 'callee';
+        listenCallUpdates(callId);
+        startCallTimer();
+      } catch (err) {
+        console.error('Accept call error:', err);
+        cleanupCall();
+      }
+    }
+
+    // ==================== DECLINE CALL ====================
+    function declineCall() {
+      if (!currentCallData) return;
+      document.getElementById('incomingCall').classList.remove('show');
+      stopRingtone();
+      clearTimeout(missedTimeout);
+      callsDb.doc(currentCallData.callId).update({ status: 'declined' }).catch(() => {});
+      currentCallData = null;
+    }
+
+    // ==================== END CALL ====================
+    async function endCall() {
+      if (currentCallData) {
+        try {
+          await callsDb.doc(currentCallData.callId).update({ status: 'ended', ended_at: firebase.firestore.FieldValue.serverTimestamp() });
+        } catch (e) {}
+      }
+      cleanupCall();
+    }
+
+    function cleanupCall() {
+      clearTimeout(missedTimeout);
+      if (callTimerInt) { clearInterval(callTimerInt); callTimerInt = null; }
+      if (callPeerConn) { callPeerConn.close(); callPeerConn = null; }
+      if (callLocalStream) { callLocalStream.getTracks().forEach(t => t.stop()); callLocalStream = null; }
+      if (callUpdateListener) { callUpdateListener(); callUpdateListener = null; }
+      iceFromCount = 0;
+      iceToCount = 0;
+      document.getElementById('incomingCall').classList.remove('show');
+      document.getElementById('outgoingCall').classList.remove('show');
+      document.getElementById('activeCall').classList.remove('show');
+      stopRingtone();
+      resetSlide();
+      currentCallData = null;
+    }
+
+    // ==================== WEBRTC SETUP ====================
+    function setupPeerConn(isCaller) {
+      callPeerConn = new RTCPeerConnection(STUN);
+
+      if (callLocalStream) {
+        callLocalStream.getTracks().forEach(t => {
+          callPeerConn.addTrack(t, callLocalStream);
+        });
+      }
+
+      const remoteStream = new MediaStream();
+
+      callPeerConn.ontrack = (event) => {
+        event.streams[0].getTracks().forEach(t => remoteStream.addTrack(t));
+        const rv = document.getElementById('remoteVideo');
+        const nv = document.getElementById('noVideo');
+        if (remoteStream.getVideoTracks().length > 0) {
+          rv.srcObject = remoteStream;
+          rv.style.display = 'block';
+          nv.style.display = 'none';
+          rv.play().catch(() => {});
+        }
+        const ra = document.getElementById('remoteAudio');
+        if (remoteStream.getAudioTracks().length > 0) {
+          ra.srcObject = remoteStream;
+          ra.play().catch(() => {});
+        }
+      };
+
+      callPeerConn.onicecandidate = (event) => {
+        if (event.candidate && currentCallData) {
+          const f = isCaller ? 'ice_from' : 'ice_to';
+          callsDb.doc(currentCallData.callId).update({
+            [f]: firebase.firestore.FieldValue.arrayUnion(JSON.stringify(event.candidate))
+          }).catch(() => {});
+        }
+      };
+
+      callPeerConn.onconnectionstatechange = () => {
+        if (['disconnected', 'failed', 'closed'].includes(callPeerConn.connectionState)) {
+          cleanupCall();
+        }
+      };
+
+      // Local video
+      const lv = document.getElementById('localVideo');
+      if (lv && callLocalStream) {
+        lv.srcObject = callLocalStream;
+        lv.style.display = callLocalStream.getVideoTracks().length > 0 ? 'block' : 'none';
+        lv.play().catch(() => {});
+      }
+
+      // Mute button state
+      document.getElementById('muteBtn').className = 'ctrl-btn';
+      document.getElementById('videoBtn').className = 'ctrl-btn';
+    }
+
+    // ==================== LISTEN CALL UPDATES ====================
+    function listenCallUpdates(callId) {
+      if (callUpdateListener) callUpdateListener();
+
+      callUpdateListener = callsDb.doc(callId).onSnapshot((snap) => {
+        if (!snap.exists) { cleanupCall(); return; }
+        const d = snap.data();
+
+        if (!currentCallData) { cleanupCall(); return; }
+
+        if (d.status === 'ended' || d.status === 'declined' || d.status === 'missed') {
+          cleanupCall();
+          return;
+        }
+
+        // Handle answer for caller
+        if (currentCallData.role === 'caller' && d.answer && !callPeerConn?.currentRemoteDescription) {
+          try {
+            const a = JSON.parse(d.answer);
+            callPeerConn.setRemoteDescription(a);
+            const name = getUserName(currentCallData.userId);
+            showActiveCallUI(name, currentCallData.type);
+            startCallTimer();
+          } catch (e) {}
+        }
+
+        // Handle ICE candidates
+        if (currentCallData.role === 'caller' && d.ice_to) {
+          while (iceToCount < d.ice_to.length) {
+            try { callPeerConn.addIceCandidate(JSON.parse(d.ice_to[iceToCount])); } catch (e) {}
+            iceToCount++;
+          }
+        }
+        if (currentCallData.role === 'callee' && d.ice_from) {
+          while (iceFromCount < d.ice_from.length) {
+            try { callPeerConn.addIceCandidate(JSON.parse(d.ice_from[iceFromCount])); } catch (e) {}
+            iceFromCount++;
+          }
+        }
+      });
+    }
+
+    // ==================== CALL UI ====================
+    function showActiveCallUI(name, type) {
+      document.getElementById('outgoingCall').classList.remove('show');
+      document.getElementById('activeCall').classList.add('show');
+      const init = name.charAt(0).toUpperCase();
+      document.getElementById('activeBigAvatar').textContent = init;
+      document.getElementById('activeNameText').textContent = name;
+      document.getElementById('activeName').textContent = name;
+      // Show/hide video call controls based on type
+      const vBtn = document.getElementById('videoBtn');
+      if (type === 'audio') {
+        vBtn.style.opacity = '0.3';
+        vBtn.style.pointerEvents = 'none';
+      } else {
+        vBtn.style.opacity = '1';
+        vBtn.style.pointerEvents = 'auto';
+      }
+    }
+
+    function startCallTimer() {
+      const start = Date.now();
+      callTimerInt = setInterval(() => {
+        const e = Math.floor((Date.now() - start) / 1000);
+        const m = String(Math.floor(e / 60)).padStart(2, '0');
+        const s = String(e % 60).padStart(2, '0');
+        document.getElementById('callTimer').textContent = m + ':' + s;
+      }, 1000);
+    }
+
+    // ==================== CALL CONTROLS ====================
+    function toggleMute() {
+      isMuted = !isMuted;
+      if (callLocalStream) {
+        callLocalStream.getAudioTracks().forEach(t => t.enabled = !isMuted);
+      }
+      document.getElementById('muteBtn').classList.toggle('off', isMuted);
+    }
+
+    function toggleVideo() {
+      if (!callLocalStream || !currentCallData || currentCallData.type === 'audio') return;
+      isVideoOn = !isVideoOn;
+      callLocalStream.getVideoTracks().forEach(t => t.enabled = isVideoOn);
+      document.getElementById('videoBtn').classList.toggle('off', !isVideoOn);
+      document.getElementById('localVideo').style.display = isVideoOn ? 'block' : 'none';
+    }
+
+    function toggleSpeaker() {
+      const ra = document.getElementById('remoteAudio');
+      if (ra) {
+        ra.sinkId = ra.sinkId ? '' : undefined; // basic toggle
+      }
+    }
+
+    // ==================== RINGTONE ====================
+    function playRingtone() {
+      try {
+        ringCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ringCtx.createOscillator();
+        const gain = ringCtx.createGain();
+        osc.connect(gain);
+        gain.connect(ringCtx.destination);
+        osc.type = 'sine';
+        osc.frequency.value = 440;
+        gain.gain.value = 0.3;
+        osc.start();
+        let v = 0.3;
+        ringInterval = setInterval(() => {
+          v = v === 0.3 ? 0.1 : 0.3;
+          gain.gain.value = v;
+        }, 500);
+        ringCtx._osc = osc;
+        ringCtx._gain = gain;
+      } catch (e) {}
+    }
+
+    function stopRingtone() {
+      if (ringInterval) { clearInterval(ringInterval); ringInterval = null; }
+      if (ringCtx) {
+        try { ringCtx._osc.stop(); } catch (e) {}
+        ringCtx.close().catch(() => {});
+        ringCtx = null;
+      }
+    }
+
+    // ==================== SLIDE TO ANSWER ====================
+    let slideState = null;
+
+    function initSlide() {
+      const track = document.getElementById('slideTrack');
+      const thumb = document.getElementById('slideThumb');
+      const fill = document.getElementById('slideFill');
+      const text = document.getElementById('slideText');
+      if (!track || !thumb) return;
+
+      slideState = { dragging: false };
+
+      function getMax() { return track.offsetWidth - thumb.offsetWidth; }
+
+      function onStart(cx) {
+        if (!slideState) initSlide();
+        slideState.dragging = true;
+        slideState.sx = cx;
+        slideState.sl = thumb.offsetLeft;
+        slideState.mw = getMax();
+        thumb.style.transition = 'none';
+        fill.style.transition = 'none';
+      }
+
+      function onMove(cx) {
+        if (!slideState?.dragging) return;
+        const d = cx - slideState.sx;
+        const p = Math.max(0, Math.min(d / slideState.mw, 1));
+        thumb.style.left = (2 + p * slideState.mw) + 'px';
+        fill.style.width = (p * 100) + '%';
+        text.style.opacity = p > 0.1 ? '0' : '1';
+        if (p >= 0.85) {
+          slideState.dragging = false;
+          resetSlide();
+          acceptCall();
+        }
+      }
+
+      function onEnd() {
+        if (slideState?.dragging) { slideState.dragging = false; resetSlide(); initSlide(); }
+      }
+
+      thumb.onpointerdown = (e) => { e.preventDefault(); onStart(e.clientX); };
+      thumb.ontouchstart = (e) => { e.preventDefault(); onStart(e.touches[0].clientX); };
+      document.onpointermove = (e) => { if (slideState?.dragging) onMove(e.clientX); };
+      document.ontouchmove = (e) => { if (slideState?.dragging) { e.preventDefault(); onMove(e.touches[0].clientX); } };
+      document.onpointerup = onEnd;
+      document.ontouchend = onEnd;
+    }
+
+    function resetSlide() {
+      const thumb = document.getElementById('slideThumb');
+      const fill = document.getElementById('slideFill');
+      const text = document.getElementById('slideText');
+      if (!thumb) return;
+      thumb.style.transition = 'left 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      fill.style.transition = 'width 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      thumb.style.left = '2px';
+      fill.style.width = '0%';
+      text.style.opacity = '1';
+      slideState = null;
+      document.onpointermove = null;
+      document.ontouchmove = null;
+      document.onpointerup = null;
+      document.ontouchend = null;
+    }
+
+    // ==================== TELEGRAM SETTINGS MODAL ====================
+    function openTelegramSettings() {
+      document.getElementById('tgBotToken').value = telegramBotToken;
+      document.getElementById('tgChatId').value = telegramChatId;
+      document.getElementById('tgSettingsModal').style.display = 'flex';
+    }
+
+    function closeTelegramSettings() {
+      document.getElementById('tgSettingsModal').style.display = 'none';
+    }
+
+    function saveTelegramSettings() {
+      const botToken = document.getElementById('tgBotToken').value.trim();
+      const chatId = document.getElementById('tgChatId').value.trim();
+      if (!botToken || !chatId) {
+        document.getElementById('tgSaveStatus').textContent = 'Both fields are required';
+        return;
+      }
+      document.getElementById('tgSaveStatus').textContent = 'Saving...';
+      db.collection('settings').doc('telegram').set({
+        botToken: botToken,
+        chatId: chatId
+      })
+      .then(function() {
+        telegramBotToken = botToken;
+        telegramChatId = chatId;
+        document.getElementById('tgSaveStatus').textContent = 'Saved successfully';
+        setTimeout(closeTelegramSettings, 1200);
+      })
+      .catch(function(err) {
+        document.getElementById('tgSaveStatus').textContent = 'Error: ' + err.message;
+      });
+    }
+
+    function loadTelegramSettings() {
+      db.collection('settings').doc('telegram').get()
+        .then(function(doc) {
+          if (doc.exists) {
+            telegramBotToken = doc.data().botToken || '';
+            telegramChatId = doc.data().chatId || '';
+          }
+        })
+        .catch(function(err) { console.error('Failed to load Telegram settings:', err); });
+    }
+
+    document.getElementById('tgSettingsBtn').addEventListener('click', openTelegramSettings);
+  </script>
+
+  <!-- Telegram Settings Modal -->
+  <div id="tgSettingsModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); backdrop-filter:blur(4px); z-index:2000; align-items:center; justify-content:center;" onclick="if(event.target===this)closeTelegramSettings()">
+    <div style="background:#fff; border-radius:16px; padding:28px; width:90%; max-width:400px; box-shadow:0 8px 40px rgba(0,0,0,0.2); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF9500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span style="font-size:18px; font-weight:700;">Telegram Settings</span>
+      </div>
+      <label style="display:block; font-size:13px; font-weight:600; color:#555; margin-bottom:4px;">Bot Token</label>
+      <input id="tgBotToken" type="text" placeholder="Enter your bot token" style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:10px; font-size:14px; box-sizing:border-box; outline:none; margin-bottom:14px;">
+      <label style="display:block; font-size:13px; font-weight:600; color:#555; margin-bottom:4px;">Chat ID</label>
+      <input id="tgChatId" type="text" placeholder="Enter your chat ID" style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:10px; font-size:14px; box-sizing:border-box; outline:none; margin-bottom:18px;">
+      <div style="display:flex; gap:10px;">
+        <button onclick="saveTelegramSettings()" style="flex:1; padding:10px; border:none; border-radius:10px; background:linear-gradient(135deg,#007AFF,#0056D2); color:#fff; font-size:14px; font-weight:600; cursor:pointer;">Save</button>
+        <button onclick="closeTelegramSettings()" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:10px; background:#fff; color:#333; font-size:14px; font-weight:600; cursor:pointer;">Cancel</button>
+      </div>
+      <div id="tgSaveStatus" style="font-size:12px; color:#888; margin-top:10px; text-align:center;"></div>
+    </div>
+  </div>
+</body>
+</html>
