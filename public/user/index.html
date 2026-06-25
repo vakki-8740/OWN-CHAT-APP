@@ -1061,6 +1061,38 @@
       50% { opacity: 0.4; }
     }
 
+    .broadcast-msg {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 12px 0;
+      padding: 8px 16px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .bc-badge {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--ios-blue);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+    .bc-sender {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--ios-text2);
+      margin-bottom: 4px;
+    }
+    .bc-time {
+      font-size: 11px;
+      color: var(--ios-gray2);
+      margin-top: 2px;
+    }
+    .broadcast-msg .message-bubble { margin: 0; }
+    .broadcast-msg .voice-msg-inner { justify-content: center; }
+
     .msg-reaction small {
       font-size: 10px;
       font-weight: 600;
@@ -2933,6 +2965,7 @@
       loadProfile();
       listenForIncomingCalls();
       listenNewMsgNotifications();
+      listenBroadcast();
     }
 
     function setAvatarImg(elId, url) {
@@ -3038,6 +3071,7 @@
 
       listenMessages();
       listenTyping();
+      renderBroadcastMessages();
     }
 
     function goBack() {
@@ -3948,6 +3982,85 @@
       document.getElementById('toastMsg').textContent = text;
       t.classList.add('show');
       setTimeout(() => t.classList.remove('show'), 4000);
+    }
+
+    // ==================== BROADCAST VOICE ====================
+    let broadcastMessages = [];
+    let unsubBroadcast = null;
+
+    function listenBroadcast() {
+      if (unsubBroadcast) unsubBroadcast();
+      if (!myId) return;
+      unsubBroadcast = db.collection('messages')
+        .where('to', '==', '__broadcast__')
+        .orderBy('created_at', 'asc')
+        .onSnapshot((snap) => {
+          snap.docChanges().forEach(ch => {
+            if (ch.type === 'added') {
+              const d = ch.doc.data();
+              const msg = { id: ch.doc.id, ...d, created_at: d.created_at?.toDate?.()?.toISOString() || d.created_at };
+              broadcastMessages.push(msg);
+              appendBroadcastMessage(msg);
+              // Show toast if not in this tab or no chat selected
+              if (!selectedUserId) {
+                showNewMsgNotif(d);
+              }
+            }
+          });
+        });
+    }
+
+    function appendBroadcastMessage(msg) {
+      const area = document.getElementById('messagesArea');
+      const typingEl = document.getElementById('typingIndicator');
+      const user = allUsers.find(u => u.id === msg.from);
+      const name = user ? user.name : 'Unknown';
+      const time = new Date(msg.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+      const dur = msg.voice_duration ? formatDuration(msg.voice_duration) : '0:00';
+
+      const el = document.createElement('div');
+      el.className = 'broadcast-msg';
+      el.dataset.bcId = msg.id;
+      el.innerHTML = `
+        <div class="bc-badge">Broadcast</div>
+        <div class="bc-sender">${escapeHtml(name)}</div>
+        <div class="message-bubble voice-msg">
+          <div class="voice-msg-inner" onclick="playVoiceMsg(this,'${msg.voice}')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            <span class="voice-dur">${dur}</span>
+          </div>
+        </div>
+        <div class="bc-time">${time}</div>
+      `;
+      area.insertBefore(el, typingEl);
+      scrollToBottom();
+    }
+
+    function renderBroadcastMessages() {
+      const area = document.getElementById('messagesArea');
+      const typingEl = document.getElementById('typingIndicator');
+      document.querySelectorAll('.broadcast-msg').forEach(el => el.remove());
+      broadcastMessages.forEach(msg => {
+        const user = allUsers.find(u => u.id === msg.from);
+        const name = user ? user.name : 'Unknown';
+        const time = new Date(msg.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+        const dur = msg.voice_duration ? formatDuration(msg.voice_duration) : '0:00';
+        const el = document.createElement('div');
+        el.className = 'broadcast-msg';
+        el.dataset.bcId = msg.id;
+        el.innerHTML = `
+          <div class="bc-badge">Broadcast</div>
+          <div class="bc-sender">${escapeHtml(name)}</div>
+          <div class="message-bubble voice-msg">
+            <div class="voice-msg-inner" onclick="playVoiceMsg(this,'${msg.voice}')">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <span class="voice-dur">${dur}</span>
+            </div>
+          </div>
+          <div class="bc-time">${time}</div>
+        `;
+        area.insertBefore(el, typingEl);
+      });
     }
 
     // ==================== SHOW INCOMING CALL ====================
